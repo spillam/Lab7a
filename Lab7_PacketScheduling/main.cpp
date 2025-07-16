@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <queue>
 #include "packet.h"
 
 using namespace std;
@@ -100,6 +101,81 @@ void WFQ(vector<Packet> pkts) {
 		}
 	}
 	
+}
+
+void RR(vector<Packet> pkts)
+{
+
+	int framesOrdered = 0;
+	int currentCheckedFrame = 0;
+
+	vector<queue<Packet>> queues = { {}, {} };
+	vector<Packet> orderedPkts = {};
+
+	int queueNumber = 0;
+
+	int queue1Index = 0, queue2Index = 0;
+
+	while (framesOrdered < pkts.size())
+	{
+		for (int i = 0; i < pkts.size(); i++)
+		{
+			if (pkts[i].arrival == currentCheckedFrame)
+				queues[pkts[i].flow - 1].push(pkts[i]);
+		}
+
+		cout << "We are currently examining queue: " << queueNumber << "." << endl;
+		if (queues[queueNumber].size() > 0) // if the queue is not empty...
+		{
+			cout << "Queue " << queueNumber << " has sent packet " << queues[queueNumber].front().ID << "!" << endl;
+			orderedPkts.push_back(queues[queueNumber].front());
+			queues[queueNumber].front().end = framesOrdered;
+			queues[queueNumber].pop();
+			framesOrdered++;
+
+			if (queueNumber == 0)
+				queueNumber = 1;
+			else
+				queueNumber = 0;
+		}
+		else
+		{
+			cout << "Queue " << queueNumber << " was empty. Checking other queue..." << endl;
+			if (queueNumber == 0)
+				queueNumber = 1;
+			else
+				queueNumber = 0;
+
+			if (queues[queueNumber].size() > 0) // if the queue is not empty...
+			{
+				cout << "Queue " << queueNumber << " has sent packet " << queues[queueNumber].front().ID << "!" << endl;
+				orderedPkts.push_back(queues[queueNumber].front());
+				queues[queueNumber].front().end = framesOrdered;
+				queues[queueNumber].pop();
+				framesOrdered++;
+
+				if (queueNumber == 0)
+					queueNumber = 1;
+				else
+					queueNumber = 0;
+			}
+		}
+
+		currentCheckedFrame++;
+	}
+
+	cout << "Ordered Packets has " << orderedPkts.size() << " packets in it!" << endl;
+
+	for (int i = 0; i < orderedPkts.size(); i++)
+	{
+		cout << "Packet number " << orderedPkts[i].ID << endl;
+		orderedPkts[i].end = i;
+	}
+
+	for (int i = 0; i < pkts.size(); i++)
+	{
+		cout << "Packet " << pkts[i].ID << " ended at frame " << pkts[i].end << "." << endl;
+	}
 }
 
 int main()
