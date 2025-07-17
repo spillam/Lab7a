@@ -108,25 +108,25 @@ void WFQ(vector<Packet> pkts) {
 			if (class1count < class1ordered.size()) {
 				//Check if Class 1 has a frame ready
 				if (class1ordered[class1count].arrival <= transmissionSlot) {
-					cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
+					//cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
 					transmissionOrder.push_back(class1ordered[class1count].ID);
 					class1count++;
 					transmissionSlot++;
 					weightCounter++;
-					cout << "class1count = " << class1count << endl;
+					/*cout << "class1count = " << class1count << endl;
 					cout << "class2count = " << class2count << endl;
-					cout << "weightCounter = " << weightCounter << endl;
+					cout << "weightCounter = " << weightCounter << endl;*/
 				}
 				//Class 1's next frame has not arrived; check Class 2 for a frame to send
 				else if (class2ordered[class2count].arrival <= transmissionSlot && class2count < class2ordered.size()) {
 					transmissionOrder.push_back(class2ordered[class2count].ID);
-					cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
+					//cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
 					class2count++;
 					transmissionSlot++;
 					weightCounter = 0;
-					cout << "class1count = " << class1count << endl;
+					/*cout << "class1count = " << class1count << endl;
 					cout << "class2count = " << class2count << endl;
-					cout << "weightCounter = " << weightCounter << endl;
+					cout << "weightCounter = " << weightCounter << endl;*/
 				}
 				//neither classes have a frame ready
 				else {
@@ -137,13 +137,13 @@ void WFQ(vector<Packet> pkts) {
 			//Class 1 has sent all frames already; send from Class 2 instead if possible
 			else if (class2ordered[class2count].arrival <= transmissionSlot && class2count < class2ordered.size()) {
 				transmissionOrder.push_back(class2ordered[class2count].ID);
-				cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
+				//cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
 				class2count++;
 				transmissionSlot++;
 				weightCounter = 0;
-				cout << "class1count = " << class1count << endl;
+				/*cout << "class1count = " << class1count << endl;
 				cout << "class2count = " << class2count << endl;
-				cout << "weightCounter = " << weightCounter << endl;
+				cout << "weightCounter = " << weightCounter << endl;*/
 			}
 			//neither classes have a frame ready
 			else {
@@ -158,24 +158,24 @@ void WFQ(vector<Packet> pkts) {
 				//Check if Class 2 has a frame ready
 				if (class2ordered[class2count].arrival <= transmissionSlot) {
 					transmissionOrder.push_back(class2ordered[class2count].ID);
-					cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
+					//cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
 					class2count++;
 					transmissionSlot++;
 					weightCounter = 0;
-					cout << "class1count = " << class1count << endl;
+					/*cout << "class1count = " << class1count << endl;
 					cout << "class2count = " << class2count << endl;
-					cout << "weightCounter = " << weightCounter << endl;
+					cout << "weightCounter = " << weightCounter << endl;*/
 				}
 				//Class 2's next frame has not arrived; check Class 1 for a frame to send
 				else if (class1ordered[class1count].arrival <= transmissionSlot && class1count < class1ordered.size()) {
 					transmissionOrder.push_back(class1ordered[class1count].ID);
-					cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
+					//cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
 					class1count++;
 					transmissionSlot++;
 					weightCounter = 1;
-					cout << "class1count = " << class1count << endl;
+					/*cout << "class1count = " << class1count << endl;
 					cout << "class2count = " << class2count << endl;
-					cout << "weightCounter = " << weightCounter << endl;
+					cout << "weightCounter = " << weightCounter << endl;*/
 				}
 				//neither classes have a frame ready
 				else {
@@ -186,13 +186,13 @@ void WFQ(vector<Packet> pkts) {
 			//Class 2 has sent all frames already; send from Class 1 instead if possible
 			else if (class1ordered[class1count].arrival <= transmissionSlot && class1count < class1ordered.size()) {
 				transmissionOrder.push_back(class1ordered[class1count].ID);
-				cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
+				//cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
 				class1count++;
 				transmissionSlot++;
 				weightCounter = 1;
-				cout << "class1count = " << class1count << endl;
+				/*cout << "class1count = " << class1count << endl;
 				cout << "class2count = " << class2count << endl;
-				cout << "weightCounter = " << weightCounter << endl;
+				cout << "weightCounter = " << weightCounter << endl;*/
 			}
 			//neither classes have a frame ready
 			else {
