@@ -28,11 +28,13 @@ void FCFS(vector<Packet> pkts) {
 		currentCheckedFrame++;
 	}
 
+	cout << "Pkt\tFlow\tArrival\t  End\tDelay" << endl;
 	for (int i = 0; i < orderedPkts.size(); i++)
 	{
 		pkts[i].end = orderedPkts[i].ID;
-		cout << "Packet " << pkts[i].ID << " ended at frame " << pkts[i].end << "." << endl;
-	}
+		pkts[i].delay = pkts[i].end - pkts[i].arrival;
+		cout << pkts[i].ID << "\t" << pkts[i].flow << "\t" << pkts[i].arrival << "\t  " << pkts[i].end << "\t" << pkts[i].delay << endl;
+	} 
 }
 
 void WFQ(vector<Packet> pkts) {
@@ -79,29 +81,12 @@ void WFQ(vector<Packet> pkts) {
 			}
 		}
 	}
-	/*cout << pkts.size() << endl;
-	cout << class1.size() << endl;
-	cout << class2.size() << endl;
-	cout << class1ordered.size() << endl;
-	cout << class2ordered.size() << endl;*/
-	/*for (const auto& frame : class1ordered) {
-		cout << frame.ID << " ";
-	}
-	cout << endl;
-	for (const auto& frame : class2ordered) {
-		cout << frame.ID << " ";
-	}
-	cout << endl;*/
-	/*cout << class1ordered[0].ID << endl;
-	cout << class1ordered[5].ID << endl;*/
+
 	//Transmission
 	int class1count = 0;
 	int class2count = 0;
 	int transmissionSlot = 0;
 	int framesSent = 0;
-	/*if (class1ordered[class1count].arrival <= transmissionSlot) {
-		cout << class1ordered[class1count].arrival << endl;
-	}*/
 	while (class1count < class1ordered.size() || class2count < class2ordered.size()) {
 		//Class 1's turn (weight of 2)
 		if (weightCounter < 2) {
@@ -109,25 +94,17 @@ void WFQ(vector<Packet> pkts) {
 			if (class1count < class1ordered.size()) {
 				//Check if Class 1 has a frame ready
 				if (class1ordered[class1count].arrival <= transmissionSlot) {
-					//cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
 					transmissionOrder.push_back(class1ordered[class1count].ID);
 					class1count++;
 					transmissionSlot++;
 					weightCounter++;
-					/*cout << "class1count = " << class1count << endl;
-					cout << "class2count = " << class2count << endl;
-					cout << "weightCounter = " << weightCounter << endl;*/
 				}
 				//Class 1's next frame has not arrived; check Class 2 for a frame to send
 				else if (class2ordered[class2count].arrival <= transmissionSlot && class2count < class2ordered.size()) {
 					transmissionOrder.push_back(class2ordered[class2count].ID);
-					//cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
 					class2count++;
 					transmissionSlot++;
 					weightCounter = 0;
-					/*cout << "class1count = " << class1count << endl;
-					cout << "class2count = " << class2count << endl;
-					cout << "weightCounter = " << weightCounter << endl;*/
 				}
 				//neither classes have a frame ready
 				else {
@@ -138,13 +115,9 @@ void WFQ(vector<Packet> pkts) {
 			//Class 1 has sent all frames already; send from Class 2 instead if possible
 			else if (class2ordered[class2count].arrival <= transmissionSlot && class2count < class2ordered.size()) {
 				transmissionOrder.push_back(class2ordered[class2count].ID);
-				//cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
 				class2count++;
 				transmissionSlot++;
 				weightCounter = 0;
-				/*cout << "class1count = " << class1count << endl;
-				cout << "class2count = " << class2count << endl;
-				cout << "weightCounter = " << weightCounter << endl;*/
 			}
 			//neither classes have a frame ready
 			else {
@@ -159,13 +132,9 @@ void WFQ(vector<Packet> pkts) {
 				//Check if Class 2 has a frame ready
 				if (class2ordered[class2count].arrival <= transmissionSlot) {
 					transmissionOrder.push_back(class2ordered[class2count].ID);
-					//cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
 					class2count++;
 					transmissionSlot++;
 					weightCounter = 0;
-					/*cout << "class1count = " << class1count << endl;
-					cout << "class2count = " << class2count << endl;
-					cout << "weightCounter = " << weightCounter << endl;*/
 				}
 				//Class 2's next frame has not arrived; check Class 1 for a frame to send
 				else if (class1ordered[class1count].arrival <= transmissionSlot && class1count < class1ordered.size()) {
@@ -174,9 +143,6 @@ void WFQ(vector<Packet> pkts) {
 					class1count++;
 					transmissionSlot++;
 					weightCounter = 1;
-					/*cout << "class1count = " << class1count << endl;
-					cout << "class2count = " << class2count << endl;
-					cout << "weightCounter = " << weightCounter << endl;*/
 				}
 				//neither classes have a frame ready
 				else {
@@ -187,13 +153,9 @@ void WFQ(vector<Packet> pkts) {
 			//Class 2 has sent all frames already; send from Class 1 instead if possible
 			else if (class1ordered[class1count].arrival <= transmissionSlot && class1count < class1ordered.size()) {
 				transmissionOrder.push_back(class1ordered[class1count].ID);
-				//cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
 				class1count++;
 				transmissionSlot++;
 				weightCounter = 1;
-				/*cout << "class1count = " << class1count << endl;
-				cout << "class2count = " << class2count << endl;
-				cout << "weightCounter = " << weightCounter << endl;*/
 			}
 			//neither classes have a frame ready
 			else {
@@ -228,17 +190,28 @@ void WFQ(vector<Packet> pkts) {
 		}
 	}
 
+	float totalDelay = 0;
+
 	cout << "Pkt\tFlow\tArrival\t  End\tDelay" << endl;
 	for (int i = 0; i < orderedPkts.size(); i++) {
 		cout << orderedPkts[i].ID << "\t" << orderedPkts[i].flow << "\t" << orderedPkts[i].arrival << "\t  " << orderedPkts[i].end << "\t" << orderedPkts[i].delay << endl;
+		totalDelay += orderedPkts[i].delay;
 	}
+	totalDelay = totalDelay / orderedPkts.size();
 
 
 	
 	for (const auto& frame : transmissionOrder) {
-		cout << "[" << frame << "] ";
+		if (frame != 0) { 
+			cout << "[" << frame << "] "; 
+		}
+		else if (frame == 0) {
+			cout << "[" << " " << "] ";
+		}
+		
 	}
 	cout << endl;
+	cout << "Average Delay: " << fixed << setprecision(2) << (totalDelay) << endl;
 	
 }
 
@@ -266,8 +239,6 @@ void RR(vector<Packet> pkts)
 				enqueued[i] = true;
 			}
 		}
-
-		//cout << "We are currently examining queue: " << queueNumber << "." << endl;
 
 		if (!queues[queueNumber].empty())
 		{
@@ -325,8 +296,7 @@ void RR(vector<Packet> pkts)
 			cout << "[" << (orderedPkts[i] + 1) << "]";
 	}
 
-	cout << endl;
-
+	
 	cout << "Average Delay: " << fixed << setprecision(2) << (totalDelay / (float)pkts.size()) << endl;
 }
 
@@ -337,7 +307,14 @@ int main()
 							 Packet(7, 2, 3), Packet(8, 2, 5), Packet(9, 2, 5),
 							 Packet(10, 2, 7), Packet(11, 1, 8), Packet(12, 1, 8)
 	};
-	RR(pkts);
+	vector<Packet> pkts2 = { Packet(1, 1, 0), Packet(2, 2, 2), Packet(3, 1, 3),
+						 Packet(4, 2, 3), Packet(5, 2, 3), Packet(6, 1, 5),
+						 Packet(7, 2, 6), Packet(8, 1, 7), Packet(9, 1, 7),
+						 Packet(10, 2, 12), Packet(11, 1, 13), Packet(12, 2, 14),
+						 Packet(13, 2, 15), Packet(14, 2, 15), Packet(15, 1, 16),
+						 Packet(16, 1, 16)
+	};
+	FCFS(pkts); 
 	
 
 
