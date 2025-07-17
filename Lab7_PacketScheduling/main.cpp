@@ -1,7 +1,10 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include "packet.h"
+#include "Packet.h"
+ 
+using std::cout;
+using std::endl;
 
 using namespace std;
 
@@ -31,11 +34,8 @@ void FCFS(vector<Packet> pkts) {
 	}
 }
 
-void roundRobin(vector<Packet> pkts) {
-
-}
-
 void WFQ(vector<Packet> pkts) {
+	cout << "WFQ called" << endl;
 	vector<Packet> class1 = {};
 	vector<Packet> class2 = {};
 	vector<Packet> class1ordered = {};
@@ -78,28 +78,136 @@ void WFQ(vector<Packet> pkts) {
 			}
 		}
 	}
+	/*cout << pkts.size() << endl;
+	cout << class1.size() << endl;
+	cout << class2.size() << endl;
+	cout << class1ordered.size() << endl;
+	cout << class2ordered.size() << endl;*/
+	/*for (const auto& frame : class1ordered) {
+		cout << frame.ID << " ";
+	}
+	cout << endl;
+	for (const auto& frame : class2ordered) {
+		cout << frame.ID << " ";
+	}
+	cout << endl;*/
+	/*cout << class1ordered[0].ID << endl;
+	cout << class1ordered[5].ID << endl;*/
 	//Transmission
 	int class1count = 0;
 	int class2count = 0;
-	int transmissionCount = 0;
-	while (transmissionCount < pkts.size()) {
-		if (weightCounter < 2 && class1ordered[class1count].arrival <= transmissionCount) {
-			transmissionOrder[transmissionCount] = class1ordered[transmissionCount].ID;
-			class1count++;
-			transmissionCount++;
-			weightCounter++;
+	int transmissionSlot = 0;
+	int framesSent = 0;
+	/*if (class1ordered[class1count].arrival <= transmissionSlot) {
+		cout << class1ordered[class1count].arrival << endl;
+	}*/
+	while (class1count < class1ordered.size() || class2count < class2ordered.size()) {
+		//Class 1's turn (weight of 2)
+		if (weightCounter < 2) {
+			//Check if Class 1 has sent all frames already
+			if (class1count < class1ordered.size()) {
+				//Check if Class 1 has a frame ready
+				if (class1ordered[class1count].arrival <= transmissionSlot) {
+					cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
+					transmissionOrder.push_back(class1ordered[class1count].ID);
+					class1count++;
+					transmissionSlot++;
+					weightCounter++;
+					cout << "class1count = " << class1count << endl;
+					cout << "class2count = " << class2count << endl;
+					cout << "weightCounter = " << weightCounter << endl;
+				}
+				//Class 1's next frame has not arrived; check Class 2 for a frame to send
+				else if (class2ordered[class2count].arrival <= transmissionSlot && class2count < class2ordered.size()) {
+					transmissionOrder.push_back(class2ordered[class2count].ID);
+					cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
+					class2count++;
+					transmissionSlot++;
+					weightCounter = 0;
+					cout << "class1count = " << class1count << endl;
+					cout << "class2count = " << class2count << endl;
+					cout << "weightCounter = " << weightCounter << endl;
+				}
+				//neither classes have a frame ready
+				else {
+					transmissionOrder.push_back(0);
+					transmissionSlot++;
+				}
+			}
+			//Class 1 has sent all frames already; send from Class 2 instead if possible
+			else if (class2ordered[class2count].arrival <= transmissionSlot && class2count < class2ordered.size()) {
+				transmissionOrder.push_back(class2ordered[class2count].ID);
+				cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
+				class2count++;
+				transmissionSlot++;
+				weightCounter = 0;
+				cout << "class1count = " << class1count << endl;
+				cout << "class2count = " << class2count << endl;
+				cout << "weightCounter = " << weightCounter << endl;
+			}
+			//neither classes have a frame ready
+			else {
+				transmissionOrder.push_back(0);
+				transmissionSlot++;
+			}
 		}
-		else if (weightCounter == 2 && class2ordered[class2count].arrival <= transmissionCount) {
-			transmissionOrder[transmissionCount] = class2ordered[transmissionCount].ID;
-			class2count++;
-			transmissionCount++;
-			weightCounter = 0;
+		//Class 2's turn (weight of 1)
+		else if (weightCounter >= 2) {
+			//Check if Class 2 has sent all frames already
+			if (class2count < class2ordered.size()) {
+				//Check if Class 2 has a frame ready
+				if (class2ordered[class2count].arrival <= transmissionSlot) {
+					transmissionOrder.push_back(class2ordered[class2count].ID);
+					cout << class2ordered[class2count].ID << " transmitted in slot " << transmissionSlot << endl;
+					class2count++;
+					transmissionSlot++;
+					weightCounter = 0;
+					cout << "class1count = " << class1count << endl;
+					cout << "class2count = " << class2count << endl;
+					cout << "weightCounter = " << weightCounter << endl;
+				}
+				//Class 2's next frame has not arrived; check Class 1 for a frame to send
+				else if (class1ordered[class1count].arrival <= transmissionSlot && class1count < class1ordered.size()) {
+					transmissionOrder.push_back(class1ordered[class1count].ID);
+					cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
+					class1count++;
+					transmissionSlot++;
+					weightCounter = 1;
+					cout << "class1count = " << class1count << endl;
+					cout << "class2count = " << class2count << endl;
+					cout << "weightCounter = " << weightCounter << endl;
+				}
+				//neither classes have a frame ready
+				else {
+					transmissionOrder.push_back(0);
+					transmissionSlot++;
+				}
+			}
+			//Class 2 has sent all frames already; send from Class 1 instead if possible
+			else if (class1ordered[class1count].arrival <= transmissionSlot && class1count < class1ordered.size()) {
+				transmissionOrder.push_back(class1ordered[class1count].ID);
+				cout << class1ordered[class1count].ID << " transmitted in slot " << transmissionSlot << endl;
+				class1count++;
+				transmissionSlot++;
+				weightCounter = 1;
+				cout << "class1count = " << class1count << endl;
+				cout << "class2count = " << class2count << endl;
+				cout << "weightCounter = " << weightCounter << endl;
+			}
+			//neither classes have a frame ready
+			else {
+				transmissionOrder.push_back(0);
+				transmissionSlot++;
+			}
 		}
-		//note: need to send from other class if current class did not have their next packet arrive yet
-		else {
-			
-		}
+		
+		
 	}
+	
+	for (const auto& frame : transmissionOrder) {
+		cout << "[" << frame << "] ";
+	}
+	cout << endl;
 	
 }
 
@@ -180,14 +288,13 @@ void RR(vector<Packet> pkts)
 
 int main()
 {
-	// Do shit
 	vector<Packet> pkts = { Packet(1, 1, 0), Packet(2, 1, 0), Packet(3, 1, 1),
 							 Packet(4, 2, 1), Packet(5, 2, 3), Packet(6, 1, 2),
 							 Packet(7, 2, 3), Packet(8, 2, 5), Packet(9, 2, 5),
 							 Packet(10, 2, 7), Packet(11, 1, 8), Packet(12, 1, 8)
 	};
 
-	
+	WFQ(pkts);
 
 
 
