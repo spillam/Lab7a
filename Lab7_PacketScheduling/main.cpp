@@ -337,7 +337,7 @@ int main()
 							 Packet(7, 2, 3), Packet(8, 2, 5), Packet(9, 2, 5),
 							 Packet(10, 2, 7), Packet(11, 1, 8), Packet(12, 1, 8)
 	};
-	WFQ(pkts);
+	RR(pkts);
 	
 
 
