@@ -203,6 +203,36 @@ void WFQ(vector<Packet> pkts) {
 		
 		
 	}
+
+	vector<bool> assigned(pkts.size(), false);
+
+	for (int slot = 0; slot < transmissionOrder.size(); slot++) {
+		int pktID = transmissionOrder[slot];
+		if (pktID == 0) continue;
+
+		for (int i = 0; i < pkts.size(); i++) {
+			if (pkts[i].ID == pktID && !assigned[i]) {
+				pkts[i].end = slot + 1;
+				pkts[i].delay = pkts[i].end - pkts[i].arrival;
+				assigned[i] = true;
+				break;
+			}
+		}
+	}
+
+	vector<Packet> orderedPkts;
+	for (int i = 0; i < pkts.size(); i++) {
+		if (assigned[i]) {
+			orderedPkts.push_back(pkts[i]);
+		}
+	}
+
+	cout << "Pkt\tFlow\tArrival\t  End\tDelay" << endl;
+	for (int i = 0; i < orderedPkts.size(); i++) {
+		cout << orderedPkts[i].ID << "\t" << orderedPkts[i].flow << "\t" << orderedPkts[i].arrival << "\t  " << orderedPkts[i].end << "\t" << orderedPkts[i].delay << endl;
+	}
+
+
 	
 	for (const auto& frame : transmissionOrder) {
 		cout << "[" << frame << "] ";
@@ -302,7 +332,7 @@ int main()
 							 Packet(7, 2, 3), Packet(8, 2, 5), Packet(9, 2, 5),
 							 Packet(10, 2, 7), Packet(11, 1, 8), Packet(12, 1, 8)
 	};
-
+	WFQ(pkts);
 	
 
 
