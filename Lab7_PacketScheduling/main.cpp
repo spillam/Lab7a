@@ -109,8 +109,8 @@ void RR(vector<Packet> pkts)
 	int framesOrdered = 0;
 	int currentCheckedFrame = 0;
 
-	vector<queue<Packet>> queues = { {}, {} };
-	vector<Packet> orderedPkts = {};
+	vector<queue<int>> queues = { {}, {} };
+	vector<int> orderedPkts = {};
 
 	int queueNumber = 0;
 
@@ -121,15 +121,15 @@ void RR(vector<Packet> pkts)
 		for (int i = 0; i < pkts.size(); i++)
 		{
 			if (pkts[i].arrival == currentCheckedFrame)
-				queues[pkts[i].flow - 1].push(pkts[i]);
+				queues[pkts[i].flow - 1].push(i);
 		}
 
-		cout << "We are currently examining queue: " << queueNumber << "." << endl;
+		//cout << "We are currently examining queue: " << queueNumber << "." << endl;
 		if (queues[queueNumber].size() > 0) // if the queue is not empty...
 		{
-			cout << "Queue " << queueNumber << " has sent packet " << queues[queueNumber].front().ID << "!" << endl;
+			//cout << "Queue " << queueNumber << " has sent packet " << pkts[queues[queueNumber].front()].ID << "!" << endl;
 			orderedPkts.push_back(queues[queueNumber].front());
-			queues[queueNumber].front().end = framesOrdered;
+			pkts[queues[queueNumber].front()].end = framesOrdered + 1;
 			queues[queueNumber].pop();
 			framesOrdered++;
 
@@ -140,7 +140,7 @@ void RR(vector<Packet> pkts)
 		}
 		else
 		{
-			cout << "Queue " << queueNumber << " was empty. Checking other queue..." << endl;
+			//cout << "Queue " << queueNumber << " was empty. Checking other queue..." << endl;
 			if (queueNumber == 0)
 				queueNumber = 1;
 			else
@@ -148,9 +148,9 @@ void RR(vector<Packet> pkts)
 
 			if (queues[queueNumber].size() > 0) // if the queue is not empty...
 			{
-				cout << "Queue " << queueNumber << " has sent packet " << queues[queueNumber].front().ID << "!" << endl;
+				//cout << "Queue " << queueNumber << " has sent packet " << pkts[queues[queueNumber].front()].ID << "!" << endl;
 				orderedPkts.push_back(queues[queueNumber].front());
-				queues[queueNumber].front().end = framesOrdered;
+				pkts[queues[queueNumber].front()].end = framesOrdered;
 				queues[queueNumber].pop();
 				framesOrdered++;
 
@@ -164,18 +164,27 @@ void RR(vector<Packet> pkts)
 		currentCheckedFrame++;
 	}
 
-	cout << "Ordered Packets has " << orderedPkts.size() << " packets in it!" << endl;
+	int totalDelay = 0;
+
+	cout << "Pkt\tFlow\tArrival\t  End\tDelay" << endl;
+	for (int i = 0; i < orderedPkts.size(); i++)
+	{
+		pkts[i].delay = pkts[i].end - pkts[i].arrival;
+		cout << pkts[i].ID << "\t" << pkts[i].flow << "\t" << pkts[i].arrival << "\t  " << pkts[i].end << "\t" << pkts[i].delay << endl;
+
+		totalDelay += pkts[i].delay;
+	}
+
+	cout << "Timeline: ";
 
 	for (int i = 0; i < orderedPkts.size(); i++)
 	{
-		cout << "Packet number " << orderedPkts[i].ID << endl;
-		orderedPkts[i].end = i;
+		cout << "[" << (orderedPkts[i] + 1) << "]";
 	}
 
-	for (int i = 0; i < pkts.size(); i++)
-	{
-		cout << "Packet " << pkts[i].ID << " ended at frame " << pkts[i].end << "." << endl;
-	}
+	cout << endl;
+
+	cout << "Average Delay: " << (totalDelay / (float)pkts.size()) << endl;
 }
 
 int main()
@@ -188,7 +197,7 @@ int main()
 	};
 
 	
-
+	RR(pkts);
 
 
 	return 0;
