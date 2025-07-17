@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <queue>
+#include <iomanip>
 #include "Packet.h"
  
 using std::cout;
@@ -243,6 +244,7 @@ void WFQ(vector<Packet> pkts) {
 
 void RR(vector<Packet> pkts)
 {
+	vector<bool> enqueued(pkts.size(), false);
 
 	int framesOrdered = 0;
 	int currentCheckedFrame = 0;
@@ -258,71 +260,74 @@ void RR(vector<Packet> pkts)
 	{
 		for (int i = 0; i < pkts.size(); i++)
 		{
-			if (pkts[i].arrival == currentCheckedFrame)
+			if (!enqueued[i] && pkts[i].arrival <= currentCheckedFrame)
+			{
 				queues[pkts[i].flow - 1].push(i);
+				enqueued[i] = true;
+			}
 		}
 
 		//cout << "We are currently examining queue: " << queueNumber << "." << endl;
-		if (queues[queueNumber].size() > 0) // if the queue is not empty...
-		{
-			//cout << "Queue " << queueNumber << " has sent packet " << pkts[queues[queueNumber].front()].ID << "!" << endl;
-			orderedPkts.push_back(queues[queueNumber].front());
-			pkts[queues[queueNumber].front()].end = framesOrdered + 1;
-			queues[queueNumber].pop();
-			framesOrdered++;
 
-			if (queueNumber == 0)
-				queueNumber = 1;
-			else
-				queueNumber = 0;
+		if (!queues[queueNumber].empty())
+		{
+			int pktIndex = queues[queueNumber].front();
+			queues[queueNumber].pop();
+			orderedPkts.push_back(pktIndex);
+			pkts[pktIndex].end = currentCheckedFrame + 1;
+			framesOrdered++;
+		}
+		else if (!queues[1 - queueNumber].empty())
+		{
+			int pktIndex = queues[1 - queueNumber].front();
+			queues[1 - queueNumber].pop();
+			orderedPkts.push_back(pktIndex);
+			pkts[pktIndex].end = currentCheckedFrame + 1;
+			framesOrdered++;
 		}
 		else
 		{
-			//cout << "Queue " << queueNumber << " was empty. Checking other queue..." << endl;
-			if (queueNumber == 0)
-				queueNumber = 1;
-			else
-				queueNumber = 0;
-
-			if (queues[queueNumber].size() > 0) // if the queue is not empty...
-			{
-				//cout << "Queue " << queueNumber << " has sent packet " << pkts[queues[queueNumber].front()].ID << "!" << endl;
-				orderedPkts.push_back(queues[queueNumber].front());
-				pkts[queues[queueNumber].front()].end = framesOrdered;
-				queues[queueNumber].pop();
-				framesOrdered++;
-
-				if (queueNumber == 0)
-					queueNumber = 1;
-				else
-					queueNumber = 0;
-			}
+			orderedPkts.push_back(-1);
 		}
+
+		if (queueNumber == 0)
+			queueNumber = 1;
+		else
+			queueNumber = 0;
 
 		currentCheckedFrame++;
 	}
 
 	int totalDelay = 0;
 
+	int index = 0;
+
 	cout << "Pkt\tFlow\tArrival\t  End\tDelay" << endl;
 	for (int i = 0; i < orderedPkts.size(); i++)
 	{
-		pkts[i].delay = pkts[i].end - pkts[i].arrival;
-		cout << pkts[i].ID << "\t" << pkts[i].flow << "\t" << pkts[i].arrival << "\t  " << pkts[i].end << "\t" << pkts[i].delay << endl;
+		if (orderedPkts[i] == -1)
+			continue;
 
-		totalDelay += pkts[i].delay;
+		pkts[index].delay = pkts[index].end - pkts[index].arrival;
+		cout << pkts[index].ID << "\t" << pkts[index].flow << "\t" << pkts[index].arrival << "\t  " << pkts[index].end << "\t" << pkts[index].delay << endl;
+
+		totalDelay += pkts[index].delay;
+		index++;
 	}
 
 	cout << "Timeline: ";
 
 	for (int i = 0; i < orderedPkts.size(); i++)
 	{
-		cout << "[" << (orderedPkts[i] + 1) << "]";
+		if (orderedPkts[i] == -1)
+			cout << "[ ]";
+		else
+			cout << "[" << (orderedPkts[i] + 1) << "]";
 	}
 
 	cout << endl;
 
-	cout << "Average Delay: " << (totalDelay / (float)pkts.size()) << endl;
+	cout << "Average Delay: " << fixed << setprecision(2) << (totalDelay / (float)pkts.size()) << endl;
 }
 
 int main()
