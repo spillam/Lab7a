@@ -10,6 +10,7 @@ using std::endl;
 using namespace std;
 
 void FCFS(vector<Packet> pkts) {
+	cout << "FCFS Called" << endl;
 	vector<bool> enqueued(pkts.size(), false);
 
 	int framesOrdered = 0;
@@ -212,8 +213,8 @@ void WFQ(vector<Packet> pkts) {
 				transmissionSlot++;
 			}
 		}
-		
-		
+
+
 	}
 
 	vector<bool> assigned(pkts.size(), false);
@@ -249,23 +250,24 @@ void WFQ(vector<Packet> pkts) {
 	totalDelay = totalDelay / orderedPkts.size();
 
 
-	
+
 	for (const auto& frame : transmissionOrder) {
-		if (frame != 0) { 
-			cout << "[" << frame << "] "; 
+		if (frame != 0) {
+			cout << "[" << frame << "] ";
 		}
 		else if (frame == 0) {
 			cout << "[" << " " << "] ";
 		}
-		
+
 	}
 	cout << endl;
 	cout << "Average Delay: " << fixed << setprecision(2) << (totalDelay) << endl;
-	
+
 }
 
 void RR(vector<Packet> pkts)
 {
+	cout << "RR Called" << endl;
 	vector<bool> enqueued(pkts.size(), false);
 
 	int framesOrdered = 0;
@@ -346,7 +348,7 @@ void RR(vector<Packet> pkts)
 	}
 
 	cout << endl;
-	
+
 	cout << "Average Delay: " << fixed << setprecision(2) << (totalDelay / (float)pkts.size()) << endl;
 }
 
@@ -364,10 +366,10 @@ int main()
 						 Packet(13, 2, 15), Packet(14, 2, 15), Packet(15, 1, 16),
 						 Packet(16, 1, 16)
 	};
-	FCFS(pkts2); 
-	
 
-
+	FCFS(pkts2);
 
 	return 0;
+
 }
+
