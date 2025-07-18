@@ -10,31 +10,80 @@ using std::endl;
 using namespace std;
 
 void FCFS(vector<Packet> pkts) {
+	vector<bool> enqueued(pkts.size(), false);
+
 	int framesOrdered = 0;
 	int currentCheckedFrame = 0;
 
-	vector<Packet> orderedPkts = {};
+	queue<int> queue = {};
+	vector<int> orderedPkts = {};
+
+	int queueNumber = 0;
+
+	int queue1Index = 0, queue2Index = 0;
 
 	while (framesOrdered < pkts.size())
 	{
 		for (int i = 0; i < pkts.size(); i++)
 		{
-			if (pkts[i].arrival == currentCheckedFrame)
+			if (!enqueued[i] && pkts[i].arrival <= currentCheckedFrame)
 			{
-				orderedPkts.push_back(pkts[i]);
-				framesOrdered++;
+				queue.push(i);
+				enqueued[i] = true;
 			}
 		}
+
+		if (!queue.empty())
+		{
+			int pktIndex = queue.front();
+			queue.pop();
+			orderedPkts.push_back(pktIndex);
+			pkts[pktIndex].end = currentCheckedFrame + 1;
+			framesOrdered++;
+		}
+		else
+		{
+			orderedPkts.push_back(-1);
+		}
+
+		if (queueNumber == 0)
+			queueNumber = 1;
+		else
+			queueNumber = 0;
+
 		currentCheckedFrame++;
 	}
+
+	int totalDelay = 0;
+
+	int index = 0;
 
 	cout << "Pkt\tFlow\tArrival\t  End\tDelay" << endl;
 	for (int i = 0; i < orderedPkts.size(); i++)
 	{
-		pkts[i].end = orderedPkts[i].ID;
-		pkts[i].delay = pkts[i].end - pkts[i].arrival;
-		cout << pkts[i].ID << "\t" << pkts[i].flow << "\t" << pkts[i].arrival << "\t  " << pkts[i].end << "\t" << pkts[i].delay << endl;
-	} 
+		if (orderedPkts[i] == -1)
+			continue;
+
+		pkts[index].delay = pkts[index].end - pkts[index].arrival;
+		cout << pkts[index].ID << "\t" << pkts[index].flow << "\t" << pkts[index].arrival << "\t  " << pkts[index].end << "\t" << pkts[index].delay << endl;
+
+		totalDelay += pkts[index].delay;
+		index++;
+	}
+
+	cout << "Timeline: ";
+
+	for (int i = 0; i < orderedPkts.size(); i++)
+	{
+		if (orderedPkts[i] == -1)
+			cout << "[ ]";
+		else
+			cout << "[" << (orderedPkts[i] + 1) << "]";
+	}
+
+	cout << endl;
+
+	cout << "Average Delay: " << fixed << setprecision(2) << (totalDelay / (float)pkts.size()) << endl;
 }
 
 void WFQ(vector<Packet> pkts) {
@@ -296,6 +345,7 @@ void RR(vector<Packet> pkts)
 			cout << "[" << (orderedPkts[i] + 1) << "]";
 	}
 
+	cout << endl;
 	
 	cout << "Average Delay: " << fixed << setprecision(2) << (totalDelay / (float)pkts.size()) << endl;
 }
@@ -314,7 +364,7 @@ int main()
 						 Packet(13, 2, 15), Packet(14, 2, 15), Packet(15, 1, 16),
 						 Packet(16, 1, 16)
 	};
-	FCFS(pkts); 
+	FCFS(pkts2); 
 	
 
 
